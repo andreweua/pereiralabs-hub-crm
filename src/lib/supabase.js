@@ -1,31 +1,34 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Credenciais com fallback seguro para build e produção
+const supabaseUrl = 
+  import.meta.env.VITE_SUPABASE_URL || 'https://vynnjkswidzkfsvhpmyn.supabase.co';
+const supabaseAnonKey = 
+  import.meta.env.VITE_SUPABASE_ANON_KEY || 'sb_publishable_v8ulrtvfZ8-RMSaxmZhOCg_XWha5sRL';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn(
-    '[PereiraLabs Hub] Supabase URL ou Anon Key não configuradas no ambiente. Verifique o arquivo .env.'
-  );
+let clientInstance = null;
+
+try {
+  if (supabaseUrl && supabaseAnonKey) {
+    clientInstance = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
+  }
+} catch (err) {
+  console.warn('[PereiraLabs Hub] Falha ao inicializar client Supabase:', err);
 }
 
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-key',
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-    },
-  }
-);
+export const supabase = clientInstance;
 
 /**
  * Função utilitária para checar a conectividade real com o Supabase
  */
 export async function testSupabaseConnection() {
-  if (!supabaseUrl || !supabaseAnonKey) {
-    return { success: false, message: 'Credenciais ausentes no .env' };
+  if (!supabase) {
+    return { success: false, message: 'Cliente Supabase não inicializado (modo offline/local).' };
   }
   try {
     const { error } = await supabase.from('clientes_crm').select('id').limit(1);
@@ -42,6 +45,6 @@ export async function testSupabaseConnection() {
     }
     return { success: true, message: 'Conectado com sucesso ao Supabase!' };
   } catch (err) {
-    return { success: false, message: err.message || 'Falha de rede ao conectar' };
+    return { success: false, message: err?.message || 'Falha de rede ao conectar' };
   }
 }

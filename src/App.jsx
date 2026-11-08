@@ -20,25 +20,41 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('kanban');
   const [supabaseStatus, setSupabaseStatus] = useState({ success: false, message: 'Verificando...' });
 
-  // Estados locais com persistência inteligente
+  // Estados locais com persistência inteligente e defensiva
   const [clients, setClients] = useState(() => {
-    const saved = localStorage.getItem('pereiralabs_crm_clients');
-    return saved ? JSON.parse(saved) : INITIAL_CLIENTS;
+    try {
+      const saved = localStorage.getItem('pereiralabs_crm_clients');
+      return saved ? JSON.parse(saved) : INITIAL_CLIENTS;
+    } catch (e) {
+      return INITIAL_CLIENTS;
+    }
   });
 
   const [secrets, setSecrets] = useState(() => {
-    const saved = localStorage.getItem('pereiralabs_crm_secrets');
-    return saved ? JSON.parse(saved) : INITIAL_SECRETS;
+    try {
+      const saved = localStorage.getItem('pereiralabs_crm_secrets');
+      return saved ? JSON.parse(saved) : INITIAL_SECRETS;
+    } catch (e) {
+      return INITIAL_SECRETS;
+    }
   });
 
   const [equipment, setEquipment] = useState(() => {
-    const saved = localStorage.getItem('pereiralabs_crm_equipment');
-    return saved ? JSON.parse(saved) : INITIAL_EQUIPMENT;
+    try {
+      const saved = localStorage.getItem('pereiralabs_crm_equipment');
+      return saved ? JSON.parse(saved) : INITIAL_EQUIPMENT;
+    } catch (e) {
+      return INITIAL_EQUIPMENT;
+    }
   });
 
   const [telemetryLogs, setTelemetryLogs] = useState(() => {
-    const saved = localStorage.getItem('pereiralabs_crm_telemetry');
-    return saved ? JSON.parse(saved) : INITIAL_TELEMETRY_LOGS;
+    try {
+      const saved = localStorage.getItem('pereiralabs_crm_telemetry');
+      return saved ? JSON.parse(saved) : INITIAL_TELEMETRY_LOGS;
+    } catch (e) {
+      return INITIAL_TELEMETRY_LOGS;
+    }
   });
 
   // Gaveta lateral e Modais
@@ -46,38 +62,55 @@ export default function App() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isChangelogOpen, setIsChangelogOpen] = useState(false);
 
-  // Sincronizar com localStorage sempre que mudar
+  // Sincronizar com localStorage de forma segura
   useEffect(() => {
-    localStorage.setItem('pereiralabs_crm_clients', JSON.stringify(clients));
+    try {
+      localStorage.setItem('pereiralabs_crm_clients', JSON.stringify(clients));
+    } catch (e) {
+      // ignore
+    }
   }, [clients]);
 
   useEffect(() => {
-    localStorage.setItem('pereiralabs_crm_secrets', JSON.stringify(secrets));
+    try {
+      localStorage.setItem('pereiralabs_crm_secrets', JSON.stringify(secrets));
+    } catch (e) {
+      // ignore
+    }
   }, [secrets]);
 
   useEffect(() => {
-    localStorage.setItem('pereiralabs_crm_equipment', JSON.stringify(equipment));
+    try {
+      localStorage.setItem('pereiralabs_crm_equipment', JSON.stringify(equipment));
+    } catch (e) {
+      // ignore
+    }
   }, [equipment]);
 
   useEffect(() => {
-    localStorage.setItem('pereiralabs_crm_telemetry', JSON.stringify(telemetryLogs));
+    try {
+      localStorage.setItem('pereiralabs_crm_telemetry', JSON.stringify(telemetryLogs));
+    } catch (e) {
+      // ignore
+    }
   }, [telemetryLogs]);
 
   // Testar conexão Supabase ao carregar
   const checkConnection = async () => {
-    const res = await testSupabaseConnection();
-    setSupabaseStatus(res);
+    try {
+      const res = await testSupabaseConnection();
+      setSupabaseStatus(res);
 
-    // Se conectado e com tabela ativa, tenta buscar clientes remotos
-    if (res.success && !res.needsSchema) {
-      try {
+      // Se conectado e com tabela ativa, tenta buscar clientes remotos
+      if (res.success && !res.needsSchema && supabase) {
         const { data, error } = await supabase.from('clientes_crm').select('*');
         if (!error && data && data.length > 0) {
           setClients(data);
         }
-      } catch (err) {
-        console.warn('Usando armazenamento local de apoio:', err);
       }
+    } catch (err) {
+      console.warn('Usando armazenamento local de apoio:', err);
+      setSupabaseStatus({ success: false, message: 'Operando localmente' });
     }
   };
 
