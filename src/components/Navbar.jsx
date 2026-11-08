@@ -10,7 +10,8 @@ import {
   ExternalLink,
   RefreshCw,
   Sparkles,
-  FileText
+  FileText,
+  LogOut
 } from 'lucide-react';
 
 export const UNITS = [
@@ -29,7 +30,9 @@ export default function Navbar({
   setActiveTab,
   supabaseStatus, 
   onRefreshConnection,
-  onOpenChangelog
+  onOpenChangelog,
+  currentUser,
+  onLogout
 }) {
   return (
     <header className="sticky top-0 z-40 bg-[#0B0F19]/90 backdrop-blur-md border-b border-slate-800/80 shadow-lg">
@@ -149,17 +152,30 @@ export default function Navbar({
             {/* Badge Usuário Master / Superadmin */}
             <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
               <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-cyan-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs ring-2 ring-cyan-500/40 shadow-sm">
-                AP
+                {currentUser?.name ? currentUser.name.substring(0, 2).toUpperCase() : 'AP'}
               </div>
               <div className="hidden xl:block text-left">
                 <div className="flex items-center gap-1">
-                  <span className="text-xs font-bold text-slate-100">Andrew Pereira</span>
+                  <span className="text-xs font-bold text-slate-100">{currentUser?.name || 'Andrew Pereira'}</span>
                   <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
                 </div>
                 <div className="flex items-center gap-1">
-                  <span className="text-[10px] text-cyan-400 font-semibold tracking-wider uppercase">Master / Superadmin</span>
+                  <span className="text-[10px] text-cyan-400 font-semibold tracking-wider uppercase">
+                    {currentUser?.role || 'Master / Superadmin'}
+                  </span>
                 </div>
               </div>
+
+              {/* Botão Logout */}
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  title="Bloquear Painel / Sair"
+                  className="p-1.5 ml-1 text-slate-400 hover:text-rose-400 hover:bg-slate-800/60 rounded-lg transition-colors border border-slate-800/80"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
             {/* Botão Changelog */}

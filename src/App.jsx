@@ -6,6 +6,7 @@ import SecretsVault from './components/SecretsVault';
 import DroneModule from './components/DroneModule';
 import TelemetryAlerts from './components/TelemetryAlerts';
 import ChangelogModal from './components/ChangelogModal';
+import AuthScreen from './components/AuthScreen';
 import { 
   INITIAL_CLIENTS, 
   INITIAL_SECRETS, 
@@ -56,6 +57,33 @@ export default function App() {
       return INITIAL_TELEMETRY_LOGS;
     }
   });
+
+  // Autenticação de Usuário Master
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('pereiralabs_crm_user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      return null;
+    }
+  });
+
+  const handleLoginSuccess = (user) => {
+    setCurrentUser(user);
+    try {
+      localStorage.setItem('pereiralabs_crm_user', JSON.stringify(user));
+    } catch (e) {}
+  };
+
+  const handleLogout = async () => {
+    try {
+      if (supabase && supabase.auth) {
+        await supabase.auth.signOut();
+      }
+      localStorage.removeItem('pereiralabs_crm_user');
+    } catch (e) {}
+    setCurrentUser(null);
+  };
 
   // Gaveta lateral e Modais
   const [selectedClient, setSelectedClient] = useState(null);
@@ -237,6 +265,11 @@ export default function App() {
     setTelemetryLogs((prev) => [newLog, ...prev]);
   };
 
+  // Se não estiver autenticado, exibe a tela de Login Master
+  if (!currentUser) {
+    return <AuthScreen onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="min-h-screen bg-[#090D16] text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-slate-950">
       {/* Barra de Navegação Superior */}
@@ -248,6 +281,8 @@ export default function App() {
         supabaseStatus={supabaseStatus}
         onRefreshConnection={checkConnection}
         onOpenChangelog={() => setIsChangelogOpen(true)}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
 
       {/* Conteúdo Principal */}
