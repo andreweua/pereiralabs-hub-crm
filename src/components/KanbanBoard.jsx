@@ -9,10 +9,7 @@ import {
   ExternalLink, 
   ChevronRight, 
   ChevronLeft,
-  Briefcase,
-  Layers,
-  Sparkles,
-  ArrowRight
+  Briefcase
 } from 'lucide-react';
 
 export const PIPELINE_B2B = [
@@ -37,7 +34,8 @@ export default function KanbanBoard({
   activeUnit, 
   onSelectClient, 
   onUpdateClientStatus,
-  onAddNewClient 
+  onAddNewClient,
+  onOpenWhatsApp
 }) {
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -67,10 +65,14 @@ export default function KanbanBoard({
     c.status === 'Ativo/Publicado' || c.status === 'Ativo / Comissão Paga'
   ).length;
 
-  const handleWhatsAppClick = (e, whatsapp) => {
+  const handleWhatsAppClick = (e, client) => {
     e.stopPropagation();
-    if (!whatsapp) return;
-    const cleanNumber = whatsapp.replace(/\D/g, '');
+    if (onOpenWhatsApp) {
+      onOpenWhatsApp(client);
+      return;
+    }
+    if (!client.whatsapp) return;
+    const cleanNumber = client.whatsapp.replace(/\D/g, '');
     window.open(`https://wa.me/${cleanNumber}`, '_blank');
   };
 
@@ -241,11 +243,11 @@ export default function KanbanBoard({
                       {/* Botões Rápidos de Ação: WhatsApp, Drive e Navegação de Coluna */}
                       <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between gap-1">
                         <div className="flex items-center gap-1.5">
-                          {/* Botão Rápido WhatsApp */}
+                          {/* Botão Rápido WhatsApp com Templates */}
                           {client.whatsapp && (
                             <button
-                              onClick={(e) => handleWhatsAppClick(e, client.whatsapp)}
-                              title={`Abrir WhatsApp: ${client.whatsapp}`}
+                              onClick={(e) => handleWhatsAppClick(e, client)}
+                              title={`Disparar WhatsApp com Template: ${client.whatsapp}`}
                               className="p-1.5 rounded-lg bg-emerald-950/60 text-emerald-400 hover:bg-emerald-800/60 border border-emerald-800/60 transition-colors"
                             >
                               <MessageCircle className="w-3.5 h-3.5" />

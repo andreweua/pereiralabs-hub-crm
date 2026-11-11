@@ -10,16 +10,15 @@ import {
   Plus, 
   Search, 
   Trash2,
-  Server,
-  Lock,
-  Sparkles
+  Lock
 } from 'lucide-react';
 
 export default function SecretsVault({ 
   secrets, 
   activeUnit, 
   onSaveSecret, 
-  onDeleteSecret 
+  onDeleteSecret,
+  currentUser
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [revealedIds, setRevealedIds] = useState({});
@@ -35,6 +34,24 @@ export default function SecretsVault({
     segredo_valor: '',
     descricao: '',
   });
+
+  const isMaster = !currentUser?.role || currentUser.role.toLowerCase().includes('master');
+
+  if (!isMaster) {
+    return (
+      <div className="bg-slate-900/60 border border-rose-900/60 rounded-2xl p-10 text-center max-w-2xl mx-auto my-8 space-y-4">
+        <div className="inline-flex p-4 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/30">
+          <ShieldAlert className="w-8 h-8" />
+        </div>
+        <h2 className="text-lg font-bold text-white">Acesso Bloqueado por Row Level Security (RLS)</h2>
+        <p className="text-xs text-slate-400 leading-relaxed">
+          O Cofre de Credenciais (<code className="text-cyan-300">projeto_credenciais</code>) é restrito exclusivamente ao papel{' '}
+          <strong className="text-white">Master / Superadmin</strong>. Seu perfil atual é{' '}
+          <span className="text-amber-400 font-semibold">{currentUser?.role}</span>.
+        </p>
+      </div>
+    );
+  }
 
   const toggleReveal = (id) => {
     setRevealedIds(prev => ({

@@ -1,13 +1,13 @@
 # PereiraLabs Hub CRM & Painel Operacional
 
-[![Versão](https://img.shields.io/badge/versão-1.0.0-06B6D4.svg)](./CHANGELOG.md)
+[![Versão](https://img.shields.io/badge/versão-1.1.0-06B6D4.svg)](./CHANGELOG.md)
 [![Desenvolvedor](https://img.shields.io/badge/desenvolvedor-Andrew%20Pereira-blue.svg)](https://github.com/andreweua)
 [![Empresa](https://img.shields.io/badge/organiza%C3%A7%C3%A3o-Louzada%20%26%20Pereira-111827.svg)](https://github.com/andreweua)
 [![Licença](https://img.shields.io/badge/licen%C3%A7a-Propriet%C3%A1ria-0891B2.svg)](#)
 
 Painel Operacional e CRM Multiunidades da **PereiraLabs - Divisão de Tecnologia e IA**, pertencente à **Louzada & Pereira - Soluções Digitais**.
 
-Construído com **React**, **Vite**, **Tailwind CSS**, **Lucide Icons** e conectado à infraestrutura **Supabase** com **Row Level Security (RLS)**.
+Construído com **React**, **Vite**, **Tailwind CSS**, **Lucide Icons** e conectado à infraestrutura **Supabase (Auth + Realtime + PostgreSQL)** com **Row Level Security (RLS)**.
 
 ---
 
@@ -29,38 +29,40 @@ O sistema consolida operações e métricas de cinco unidades estratégicas em u
 
 - **Frontend**: React 18, Vite 6, Tailwind CSS 3
 - **Ícones**: Lucide React
-- **Banco de Dados & Autenticação**: Supabase Database (PostgreSQL) com Row Level Security (RLS)
-- **Persistência**: Híbrida (Supabase Cloud + LocalStorage de alta resiliência offline)
-- **Integrações de Tráfego & Comunicação**: WhatsApp API direta (`https://wa.me/...`), Google Drive API links, n8n Automation Webhooks
+- **Banco de Dados & Autenticação**: Supabase Database (PostgreSQL), Supabase Auth & Realtime WebSockets (`postgres_changes`) com Row Level Security (RLS)
+- **Persistência**: Híbrida (Supabase Cloud Realtime + LocalStorage de alta resiliência offline)
+- **Integrações de Tráfego & Comunicação**: Disparador WhatsApp com Templates (`https://wa.me/...`), Google Drive links, Webhooks n8n POST em tempo real
 
 ---
 
 ## 🛠️ 3. Módulos do Sistema
 
-### 3.1. Pipeline Kanban Dinâmico Adaptativo
+### 3.1. Pipeline Kanban Dinâmico Adaptativo & Disparador WhatsApp
 - **Modo B2B**: `Lead` ➔ `Onboarding` ➔ `Em Desenvolvimento` ➔ `Revisão` ➔ `Ativo/Publicado` ➔ `Pausado`.
 - **Modo Ton Afiliados**: `Lead Tráfego` ➔ `Contato Inicial` ➔ `Link Enviado` ➔ `Aguardando Ativação` ➔ `Ativo / Comissão Paga`.
-- Cards com atalho para WhatsApp, pasta do Google Drive, tag de versão do site e movimentação rápida entre colunas.
+- Cards com disparador WhatsApp com templates institucionais (`WhatsAppDispatcherModal`), pasta do Google Drive, tag de versão do site e movimentação rápida entre colunas.
 
-### 3.2. ClientDrawer Lateral
+### 3.2. Financeiro & Growth UTM (`GrowthFinanceHub`)
+- Consolidação executiva da Holding Louzada & Pereira (Receita Ativa, Pipeline em Negociação, Comissões Ton, Ticket Médio e breakdown por unidade).
+- Exportação de relatórios completos em **CSV (UTF-8 BOM)** e impressão executiva / PDF.
+- Gerador inteligente de links rastreáveis (`utm_source`, `utm_medium`, `utm_campaign`, `utm_content`) com vinculação direta a cards do CRM.
+
+### 3.3. ClientDrawer Lateral
 - Painel para edição detalhada do cliente ou oportunidade.
-- Gestão de URLs de produção, IDs de pacotes nas lojas (*Google Play Store* e *Apple App Store*) e parâmetros de campanha UTM (`utm_source`, `utm_medium`, `utm_campaign`).
+- Gestão de URLs de produção, IDs de pacotes nas lojas (*Google Play Store* e *Apple App Store*) e parâmetros de campanha UTM.
 
-### 3.3. Cofre de Credenciais (`SecretsVault`)
+### 3.4. Cofre de Credenciais (`SecretsVault`) & Governança por Papéis
 - Gerenciamento de chaves e variáveis sensíveis (`projeto_credenciais`).
 - Mascaramento por padrão (`••••••••`), botão de visualização e cópia com um clique.
-- Políticas RLS ativas para restrição de acesso ao papel Master/Superadmin.
+- Controle estrito de acesso baseado em papel (`Master / Superadmin` vs `Operador Drone Ops`, `Afiliado Ton`, `Atendimento`).
 
-### 3.4. Drone Ops & Frota Audiovisual
+### 3.5. Drone Ops & Frota Audiovisual
 - Inventário de aeronaves não tripuladas e câmeras cinema (`equipamentos_inventario`).
-- Checklist regulatório oficial:
-  - **ANAC SISANT**: Cadastro e validade da certidão.
-  - **DECEA / SARPAS**: Autorização de espaço aéreo e status de voo.
-  - **Seguro RETA**: Apólice e cobertura obrigatória contra danos a terceiros.
+- Checklist regulatório oficial: **ANAC SISANT**, **DECEA / SARPAS** e **Seguro RETA**.
 - Monitoramento de horas de voo e ciclos de bateria.
 
-### 3.5. Central de Telemetria n8n
-- Monitoramento de webhooks de campanhas, disparos de WhatsApp (Z-API) e rotinas de backup.
+### 3.6. Central de Telemetria & Webhooks n8n (`TelemetryAlerts`)
+- Configuração de endpoint POST real do n8n, disparo automático ao criar/mover cards e testador interativo de payload JSON.
 - Estatísticas de latência, taxa de disponibilidade e botão de reexecução manual (*retry*).
 
 ---
@@ -97,9 +99,10 @@ O sistema consolida operações e métricas de cinco unidades estratégicas em u
    ```
    Acesse a aplicação no navegador em: `http://localhost:3000`
 
-5. **Build para Produção:**
+5. **Build & Deploy no GitHub Pages:**
    ```bash
    npm run build
+   npm run deploy
    ```
 
 ---
@@ -121,7 +124,7 @@ Com todas as políticas RLS devidamente habilitadas.
 
 ## 👨‍💻 6. Identidade & Créditos
 
-**Desenvolvido por: PereiraLabs - Divisão de Tecnologia e IA | Louzada & Pereira - Soluções Digitais. v1.0.0**
+**Desenvolvido por: PereiraLabs - Divisão de Tecnologia e IA | Louzada & Pereira - Soluções Digitais. v1.1.0**
 
 - **Líder Técnico**: Andrew Pereira
 - **GitHub**: [https://github.com/andreweua](https://github.com/andreweua)

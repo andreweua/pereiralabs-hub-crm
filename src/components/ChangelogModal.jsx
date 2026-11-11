@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Sparkles, CheckCircle2, Shield, Layers, FileText } from 'lucide-react';
+import { X, Sparkles, Shield, FileText } from 'lucide-react';
 
 export default function ChangelogModal({ isOpen, onClose }) {
   if (!isOpen) return null;
@@ -15,7 +15,7 @@ export default function ChangelogModal({ isOpen, onClose }) {
             </div>
             <div>
               <h3 className="text-base font-bold text-white">Notas de Versão - CHANGELOG.md</h3>
-              <p className="text-xs text-slate-400">PereiraLabs Hub CRM & Painel Operacional</p>
+              <p className="text-xs text-slate-400">PereiraLabs Hub CRM &amp; Painel Operacional</p>
             </div>
           </div>
           <button
@@ -29,6 +29,33 @@ export default function ChangelogModal({ isOpen, onClose }) {
         {/* Conteúdo do Changelog */}
         <div className="overflow-y-auto flex-1 py-4 space-y-6 text-xs text-slate-300 pr-2">
           
+          {/* v1.1.0 - Fase 2 */}
+          <div className="space-y-3">
+            <div className="bg-slate-900/80 p-4 rounded-xl border border-emerald-500/40 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-white">[1.1.0] - 2026-11-11</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">
+                    FASE 2 - ATUAL
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400 font-mono">Build v1.1.0-prod</span>
+              </div>
+              <p className="text-slate-400">
+                Expansão completa com Supabase Realtime, Disparador WhatsApp com Templates, Consolidação Financeira Holding, Gerador de Links UTM e Integração Real de Webhooks n8n.
+              </p>
+            </div>
+
+            <ul className="space-y-1.5 pl-4 list-disc marker:text-emerald-400 text-slate-300">
+              <li><strong>Supabase Realtime &amp; Papéis RLS:</strong> Sincronização automática via WebSockets (<code>postgres_changes</code>) e controle de acesso por perfil (Master, Drone Ops, Afiliado Ton, Atendimento).</li>
+              <li><strong>Disparador Ativo WhatsApp:</strong> Modal com templates institucionais por unidade de negócio e registro automático de envio na telemetria.</li>
+              <li><strong>Consolidação Financeira &amp; Relatórios:</strong> KPIs da Holding, breakdown por unidade e exportação em CSV (UTF-8) e impressão executiva/PDF.</li>
+              <li><strong>Gerador de Links UTM &amp; Ton:</strong> Construção instantânea de URLs rastreáveis com vinculação direta aos cards do CRM.</li>
+              <li><strong>Webhooks n8n Reais:</strong> Configuração de endpoint POST, disparo automático em eventos do CRM e testador de payload JSON.</li>
+            </ul>
+          </div>
+
+          {/* v1.0.0 - Release Inicial */}
           <div className="bg-slate-900/80 p-4 rounded-xl border border-cyan-500/30 space-y-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -40,52 +67,31 @@ export default function ChangelogModal({ isOpen, onClose }) {
               <span className="text-[10px] text-slate-400 font-mono">Build v1.0.0-prod</span>
             </div>
             <p className="text-slate-400">
-              Lançamento oficial da infraestrutura unificada PereiraLabs Hub CRM, integrando governança da holding Louzada & Pereira, pipelines adaptativos e segurança RLS com Supabase.
+              Lançamento oficial da infraestrutura unificada PereiraLabs Hub CRM, integrando governança da holding Louzada &amp; Pereira, pipelines adaptativos e segurança RLS com Supabase.
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
               <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Adicionado (Added)
+                <Sparkles className="w-3.5 h-3.5" /> Adicionado na v1.0.0
               </h4>
               <ul className="space-y-2 pl-4 list-disc marker:text-cyan-400 text-slate-300">
-                <li>
-                  <strong>Arquitetura Multiunidades:</strong> Suporte unificado para Holding Louzada & Pereira, PereiraLabs (Tech & Apps), Louzada Films, Drone Ops e Consultoria Ton (Afiliados).
-                </li>
-                <li>
-                  <strong>Pipeline Kanban Dinâmico Adaptativo:</strong>
-                  <ul className="list-circle pl-4 mt-1 space-y-1 text-slate-400">
-                    <li>Fluxo B2B padrão: Lead ➔ Onboarding ➔ Em Desenvolvimento ➔ Revisão ➔ Ativo/Publicado ➔ Pausado.</li>
-                    <li>Fluxo Ton Afiliados: Lead Tráfego ➔ Contato Inicial ➔ Link Enviado ➔ Aguardando Ativação ➔ Ativo / Comissão Paga.</li>
-                  </ul>
-                </li>
-                <li>
-                  <strong>Cards Operacionais:</strong> Atalho direto para WhatsApp internacionalizado (<code className="text-emerald-400">+55...</code>), integração de links Google Drive e badges de versão de release.
-                </li>
-                <li>
-                  <strong>ClientDrawer Lateral:</strong> Painel para edição rápida de URLs de produção, IDs de pacotes das lojas de aplicativos (Google Play e Apple App Store) e parâmetros UTM para análise de tráfego.
-                </li>
-                <li>
-                  <strong>Cofre de Segredos (SecretsVault):</strong> Módulo seguro com ofuscação de credenciais padrão (<code className="text-slate-400">••••••••</code>), botão de cópia de alta precisão e conformidade com RLS.
-                </li>
-                <li>
-                  <strong>Módulo Drone Ops:</strong> Gerenciamento da frota de aeronaves não tripuladas e câmeras cinema com checklist regulatório ANAC SISANT, Seguro RETA e aprovação DECEA/SARPAS.
-                </li>
-                <li>
-                  <strong>Painel de Telemetria n8n:</strong> Monitoramento de fluxos de automação, webhooks de leads, tempo de resposta em milissegundos e suporte a reexecução manual (retry).
-                </li>
+                <li><strong>Arquitetura Multiunidades:</strong> Holding, PereiraLabs, Louzada Films, Drone Ops e Consultoria Ton.</li>
+                <li><strong>Pipeline Kanban Dinâmico Adaptativo:</strong> Fluxo B2B e fluxo dedicado para Ton Afiliados.</li>
+                <li><strong>ClientDrawer Lateral:</strong> URLs de produção, Google Play / App Store IDs e UTMs.</li>
+                <li><strong>Cofre de Segredos (SecretsVault):</strong> Credenciais mascaradas por padrão e proteção RLS Master.</li>
+                <li><strong>Módulo Drone Ops:</strong> Frota, horas de voo, baterias e checklist ANAC SISANT, DECEA/SARPAS e Seguro RETA.</li>
               </ul>
             </div>
 
             <div>
               <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Shield className="w-3.5 h-3.5" /> Segurança & Governança (Security)
+                <Shield className="w-3.5 h-3.5" /> Segurança &amp; Governança
               </h4>
               <ul className="space-y-1.5 pl-4 list-disc marker:text-cyan-400 text-slate-300">
-                <li>Configuração de Row Level Security (RLS) habilitada no Supabase para as tabelas principais.</li>
-                <li>Garantia de isolamento de variáveis de ambiente no arquivo <code className="text-slate-200">.gitignore</code>.</li>
-                <li>Script SQL completo de inicialização e permissões (<code className="text-slate-200">supabase-schema.sql</code>).</li>
+                <li>Políticas Row Level Security (RLS) habilitadas no Supabase e Portal de Autenticação Master.</li>
+                <li>Script SQL completo de inicialização (<code>supabase-schema.sql</code>).</li>
               </ul>
             </div>
           </div>

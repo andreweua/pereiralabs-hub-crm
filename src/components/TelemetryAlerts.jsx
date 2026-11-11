@@ -6,19 +6,39 @@ import {
   Clock, 
   RotateCw, 
   Zap, 
-  Server, 
   Send, 
   Terminal,
-  Filter
+  Filter,
+  Webhook,
+  Save,
+  Check
 } from 'lucide-react';
 
 export default function TelemetryAlerts({ 
   logs, 
   onRetryWorkflow,
-  onTriggerTestPing 
+  onTriggerTestPing,
+  n8nConfig,
+  onSaveN8nConfig,
+  onExecuteRealWebhook
 }) {
   const [filter, setFilter] = useState('all');
   const [isPinging, setIsPinging] = useState(false);
+  const [webhookUrlInput, setWebhookUrlInput] = useState(n8nConfig?.webhookUrl || '');
+  const [autoTriggerEnabled, setAutoTriggerEnabled] = useState(!!n8nConfig?.autoTrigger);
+  const [payloadJson, setPayloadJson] = useState(
+    JSON.stringify(
+      {
+        event: 'pereiralabs.crm.test_ping',
+        origin: 'PereiraLabs Hub CRM v1.1.0',
+        unit: 'pereiralabs',
+        timestamp: new Date().toISOString()
+      },
+      null,
+      2
+    )
+  );
+  const [savedConfigFeedback, setSavedConfigFeedback] = useState(false);
 
   const filteredLogs = logs.filter((log) => {
     if (filter === 'all') return true;
@@ -35,8 +55,24 @@ export default function TelemetryAlerts({
 
   const handleTestPing = async () => {
     setIsPinging(true);
-    await onTriggerTestPing();
-    setTimeout(() => setIsPinging(false), 800);
+    if (webhookUrlInput.trim() && onExecuteRealWebhook) {
+      await onExecuteRealWebhook(webhookUrlInput.trim(), payloadJson);
+    } else {
+      await onTriggerTestPing();
+    }
+    setTimeout(() => setIsPinging(false), 600);
+  };
+
+  const handleSaveConfig = (e) => {
+    e.preventDefault();
+    if (onSaveN8nConfig) {
+      onSaveN8nConfig({
+        webhookUrl: webhookUrlInput.trim(),
+        autoTrigger: autoTriggerEnabled
+      });
+    }
+    setSavedConfigFeedback(true);
+    setTimeout(() => setSavedConfigFeedback(false), 2500);
   };
 
   return (
@@ -55,7 +91,7 @@ export default function TelemetryAlerts({
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-0.5">
-              Monitoramento em tempo real de webhooks de leads, notificações Z-API WhatsApp e pipelines de dados.
+              Monitoramento em tempo real de webhooks de leads, notificações Z-API WhatsApp e disparos automáticos.
             </p>
           </div>
         </div>
@@ -63,10 +99,10 @@ export default function TelemetryAlerts({
         <button
           onClick={handleTestPing}
           disabled={isPinging}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-semibold border border-slate-700 transition-all shadow-md active:scale-95 disabled:opacity-50"
+          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold shadow-md shadow-cyan-500/20 transition-all active:scale-95 disabled:opacity-50"
         >
-          <Zap className={`w-4 h-4 ${isPinging ? 'animate-spin text-cyan-400' : 'text-cyan-400'}`} />
-          {isPinging ? 'Enviando Ping...' : 'Disparar Webhook Teste'}
+          <Zap className={`w-4 h-4 ${isPinging ? 'animate-spin' : ''}`} />
+          {isPinging ? 'Disparando...' : webhookUrlInput.trim() ? 'Disparar POST Real n8n' : 'Disparar Webhook Teste'}
         </button>
       </div>
 
@@ -106,6 +142,77 @@ export default function TelemetryAlerts({
           </div>
         </div>
       </div>
+
+      {/* Configuração de Endpoint Real n8n + Testador de Payload */}
+      <form
+        onSubmit={handleSaveConfig}
+        className="bg-[#111827]/90 rounded-2xl border border-slate-800 p-5 space-y-4"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-800">
+          <div className="flex items-center gap-2">
+            <Webhook className="w-4 h-4 text-cyan-400" />
+            <h3 className="text-sm font-bold text-white">Integração de Webhook n8n (Tempo Real)</h3>
+          </div>
+          <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={autoTriggerEnabled}
+              onChange={(e) => setAutoTriggerEnabled(e.target.checked)}
+              className="rounded border-slate-700 bg-slate-950 text-cyan-500 focus:ring-cyan-500"
+            />
+            <span>Disparar automaticamente ao criar/mover cards no CRM</span>
+          </label>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 text-xs">
+          <div className="space-y-3">
+            <div>
+              <label className="block text-slate-400 font-semibold mb-1">
+                URL do Webhook n8n (POST)
+              </label>
+              <input
+                type="url"
+                value={webhookUrlInput}
+                onChange={(e) => setWebhookUrlInput(e.target.value)}
+                placeholder="https://n8n.seu-dominio.com/webhook/pereiralabs-crm"
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-100 font-mono focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold border border-slate-700 transition-colors"
+              >
+                {savedConfigFeedback ? <Check className="w-4 h-4 text-emerald-400" /> : <Save className="w-4 h-4 text-cyan-400" />}
+                {savedConfigFeedback ? 'Configuração Salva!' : 'Salvar Endpoint'}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleTestPing}
+                disabled={isPinging}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 font-semibold border border-cyan-800/60 transition-colors"
+              >
+                <Send className="w-3.5 h-3.5" />
+                Testar Payload JSON
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-slate-400 font-semibold mb-1">
+              Payload JSON de Teste
+            </label>
+            <textarea
+              rows="4"
+              value={payloadJson}
+              onChange={(e) => setPayloadJson(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-[11px] font-mono text-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            />
+          </div>
+        </div>
+      </form>
 
       {/* Filtros e Histórico de Logs */}
       <div className="bg-slate-900/40 rounded-2xl border border-slate-800 p-5 space-y-4">

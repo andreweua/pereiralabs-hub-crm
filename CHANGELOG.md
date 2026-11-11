@@ -5,6 +5,23 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2026-11-11
+
+### Adicionado (Added) - Pacote Completo Fase 2
+- **Sincronização em Tempo Real (Supabase Realtime)**:
+  - Subscrição automática via WebSockets (`postgres_changes`) nas tabelas `clientes_crm`, `equipamentos_inventario` e `telemetria_n8n_logs` com indicador **Realtime Live** no `Navbar`.
+- **Controle de Papéis & Governança RLS**:
+  - Seletor de perfil operacional (`Master / Superadmin`, `Operador Drone Ops`, `Afiliado Ton`, `Atendimento`) e bloqueio ativo no `SecretsVault` para papéis não-Master.
+- **Disparador Ativo de WhatsApp com Templates (`WhatsAppDispatcherModal.jsx`)**:
+  - Templates institucionais pré-configurados para Onboarding B2B, Ativação Ton, Release Publicada, Liberação SARPAS Drone Ops e Revisão Louzada Films.
+  - Edição rápida, cópia e registro automático de envio na telemetria.
+- **Consolidação Financeira & Growth UTM (`GrowthFinanceHub.jsx`)**:
+  - KPIs executivos da Holding Louzada & Pereira (Receita Ativa, Pipeline em Negociação, Comissões Ton Liquidadas, Ticket Médio) e distribuição proporcional por unidade.
+  - Exportação de relatórios executivos em **CSV (UTF-8 BOM)** e impressão/PDF formatada.
+  - Gerador inteligente de links UTM com presets rápidos e vinculação direta aos cards do CRM.
+- **Integração Real de Webhooks n8n (`TelemetryAlerts.jsx`)**:
+  - Endpoint POST configurável, opção de disparo automático em eventos de criação/movimentação de cards e testador interativo de payload JSON.
+
 ## [1.0.0] - 2026-11-08
 
 ### Adicionado (Added)
