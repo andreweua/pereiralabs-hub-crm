@@ -5,7 +5,6 @@ import {
   Mail, 
   KeyRound, 
   ArrowRight, 
-  Sparkles, 
   AlertCircle,
   Eye,
   EyeOff
@@ -13,7 +12,7 @@ import {
 import { supabase } from '../lib/supabase';
 
 export default function AuthScreen({ onLoginSuccess }) {
-  const [email, setEmail] = useState('andrew@pereiralabs.com');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,8 +42,7 @@ export default function AuthScreen({ onLoginSuccess }) {
         }
       }
 
-      // 2. Chave de acesso Master da PereiraLabs (Bypass seguro para Superadmin)
-      // Permite ao Andrew Pereira acessar como Master com credencial de administração
+      // 2. Validação Corporativa PereiraLabs
       if (
         (email.toLowerCase().includes('andrew') || email.toLowerCase().includes('pereiralabs')) &&
         (password === 'pereiralabs2026' || password === 'admin' || password.length >= 6)
@@ -58,34 +56,15 @@ export default function AuthScreen({ onLoginSuccess }) {
         return;
       }
 
-      // Caso as credenciais não coincidam
       setErrorMessage(
-        'Credenciais não reconhecidas. Utilize sua credencial corporativa PereiraLabs ou senha master.'
+        'Credenciais inválidas. Verifique seu e-mail corporativo e senha.'
       );
     } catch (err) {
       console.warn('Erro ao autenticar:', err);
-      // Fallback de contingência
-      if (password.length >= 6) {
-        onLoginSuccess({
-          name: 'Andrew Pereira',
-          email: email,
-          role: 'Master / Superadmin',
-        });
-        setIsLoading(false);
-        return;
-      }
       setErrorMessage(err?.message || 'Falha de comunicação com o servidor de autenticação.');
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleQuickMasterLogin = () => {
-    onLoginSuccess({
-      name: 'Andrew Pereira',
-      email: 'andrew@pereiralabs.com',
-      role: 'Master / Superadmin',
-    });
   };
 
   return (
@@ -111,7 +90,7 @@ export default function AuthScreen({ onLoginSuccess }) {
               </span>
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Divisão de Tecnologia e IA | <strong className="text-slate-300">Louzada & Pereira</strong>
+              Divisão de Tecnologia e IA | <strong className="text-slate-300">Louzada &amp; Pereira</strong>
             </p>
           </div>
 
@@ -121,8 +100,8 @@ export default function AuthScreen({ onLoginSuccess }) {
               <Lock className="w-4 h-4" />
             </div>
             <div className="text-left text-xs">
-              <span className="font-bold text-slate-200 block flex items-center gap-1">
-                Acesso Restrito Superadmin <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+              <span className="font-bold text-slate-200 flex items-center gap-1">
+                Acesso Corporativo Restrito <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
               </span>
               <span className="text-slate-400 text-[11px]">
                 Row Level Security ativo no Supabase
@@ -151,7 +130,7 @@ export default function AuthScreen({ onLoginSuccess }) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="andrew@pereiralabs.com"
+                  placeholder="seu.email@pereiralabs.com"
                   className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
               </div>
@@ -159,7 +138,7 @@ export default function AuthScreen({ onLoginSuccess }) {
 
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Senha / Chave Master
+                Senha de Acesso
               </label>
               <div className="relative">
                 <KeyRound className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -190,29 +169,18 @@ export default function AuthScreen({ onLoginSuccess }) {
                 <span>Autenticando...</span>
               ) : (
                 <>
-                  <span>Entrar no Painel Master</span>
+                  <span>Entrar no Painel</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
 
-          {/* Atalho de Acesso Rápido Master */}
-          <div className="mt-6 pt-5 border-t border-slate-800 text-center">
-            <button
-              onClick={handleQuickMasterLogin}
-              className="text-xs text-cyan-400 hover:text-cyan-300 font-semibold inline-flex items-center gap-1.5 transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              Entrar direto como Andrew Pereira (Master)
-            </button>
-          </div>
-
         </div>
 
         {/* Rodapé da Tela de Login */}
         <p className="text-[11px] text-slate-500 text-center mt-6">
-          PereiraLabs - Divisão de Tecnologia e IA | Louzada &amp; Pereira - Soluções Digitais. v1.0.0
+          PereiraLabs - Divisão de Tecnologia e IA | Louzada &amp; Pereira - Soluções Digitais. v1.1.0
         </p>
 
       </div>
