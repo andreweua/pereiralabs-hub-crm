@@ -70,35 +70,53 @@ export default function App() {
     }
   });
 
-  // Autenticação de Usuário Master
-  const [currentUser, setCurrentUser] = useState(() => {
-    try {
-      const savedUser = localStorage.getItem('pereiralabs_crm_user');
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch {
-      return null;
-    }
-  });
+  // Autenticação gerenciada exclusivamente via sessão JWT do Supabase Auth
+  const [currentUser, setCurrentUser] = useState(null);
 
-  const handleLoginSuccess = (user) => {
-    setCurrentUser(user);
+  useEffect(() => {
     try {
-      localStorage.setItem('pereiralabs_crm_user', JSON.stringify(user));
+      localStorage.removeItem('pereiralabs_crm_user');
     } catch {
       // ignore
     }
+
+    if (!supabase || !supabase.auth) return;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setCurrentUser({
+          id: session.user.id,
+          name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
+          email: session.user.email,
+          role: 'Master / Superadmin',
+        });
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setCurrentUser((prev) => ({
+          id: session.user.id,
+          name: session.user.user_metadata?.full_name || session.user.email.split('@')[0],
+          email: session.user.email,
+          role: prev?.role || 'Master / Superadmin',
+        }));
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
+
+  const handleLoginSuccess = (user) => {
+    setCurrentUser(user);
   };
 
   const handleChangeRole = (newRole) => {
-    setCurrentUser((prev) => {
-      const updated = { ...prev, role: newRole };
-      try {
-        localStorage.setItem('pereiralabs_crm_user', JSON.stringify(updated));
-      } catch {
-        // ignore
-      }
-      return updated;
-    });
+    setCurrentUser((prev) => (prev ? { ...prev, role: newRole } : null));
   };
 
   const handleLogout = async () => {

@@ -24,44 +24,32 @@ export default function AuthScreen({ onLoginSuccess }) {
     setErrorMessage('');
 
     try {
-      // 1. Tentar autenticação oficial via Supabase Auth
-      if (supabase && supabase.auth) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password: password.trim(),
-        });
-
-        if (!error && data?.user) {
-          onLoginSuccess({
-            name: data.user.user_metadata?.full_name || 'Andrew Pereira',
-            email: data.user.email,
-            role: 'Master / Superadmin',
-          });
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      // 2. Validação Corporativa PereiraLabs
-      if (
-        (email.toLowerCase().includes('andrew') || email.toLowerCase().includes('pereiralabs')) &&
-        (password === 'pereiralabs2026' || password === 'admin' || password.length >= 6)
-      ) {
-        onLoginSuccess({
-          name: 'Andrew Pereira',
-          email: email,
-          role: 'Master / Superadmin',
-        });
+      if (!supabase || !supabase.auth) {
+        setErrorMessage('Serviço de autenticação Supabase indisponível.');
         setIsLoading(false);
         return;
       }
 
-      setErrorMessage(
-        'Credenciais inválidas. Verifique seu e-mail corporativo e senha.'
-      );
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (error || !data?.user) {
+        setErrorMessage('E-mail ou senha incorretos. Acesso negado pelo Supabase Auth.');
+        setIsLoading(false);
+        return;
+      }
+
+      onLoginSuccess({
+        id: data.user.id,
+        name: data.user.user_metadata?.full_name || data.user.email.split('@')[0],
+        email: data.user.email,
+        role: 'Master / Superadmin',
+      });
     } catch (err) {
-      console.warn('Erro ao autenticar:', err);
-      setErrorMessage(err?.message || 'Falha de comunicação com o servidor de autenticação.');
+      console.warn('Erro ao autenticar no Supabase:', err);
+      setErrorMessage('Falha de comunicação com o servidor de autenticação.');
     } finally {
       setIsLoading(false);
     }
@@ -104,7 +92,7 @@ export default function AuthScreen({ onLoginSuccess }) {
                 Acesso Corporativo Restrito <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
               </span>
               <span className="text-slate-400 text-[11px]">
-                Row Level Security ativo no Supabase
+                Autenticação Supabase Auth &amp; Row Level Security
               </span>
             </div>
           </div>
@@ -130,7 +118,7 @@ export default function AuthScreen({ onLoginSuccess }) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu.email@pereiralabs.com"
+                  placeholder="seu.email@dominio.com"
                   className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
               </div>
@@ -166,7 +154,7 @@ export default function AuthScreen({ onLoginSuccess }) {
               className="w-full mt-2 py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 transition-all transform active:scale-95 disabled:opacity-50"
             >
               {isLoading ? (
-                <span>Autenticando...</span>
+                <span>Autenticando no Supabase...</span>
               ) : (
                 <>
                   <span>Entrar no Painel</span>
